@@ -133,7 +133,7 @@ class OntologyManager:
     for key, val in upper_ontology.items():
       key = key.upper()
       if key not in self.upper_ontology:
-        self.upper_ontology[key] = [val, len(self.upper_ontology), None]
+        self.upper_ontology[key] = [val, len(self.upper_ontology)]
       else:
         self.upper_ontology[key] = [val, self.upper_ontology[key][1]]
   
@@ -170,10 +170,8 @@ class OntologyManager:
       for lexicon in self.x_lingual_lexicon_by_prefix.values():
         for val in lexicon[-1].values():
           label = val[0][0]
-          if label not in self.upper_ontology:
-            self.upper_ontology[label] = [val[0], len(self.upper_ontology)]
-          label = self.upper_ontology[label][0]
-          val[0] = label
+          if label in self.upper_ontology:
+           val[0] = self.upper_ontology[label][0]
           self._max_lexicon  = max(self._max_lexicon, val[1])
     else:
       self.x_lingual_lexicon_by_prefix = {}
@@ -318,8 +316,6 @@ class OntologyManager:
       word, label = word_label
       #if word.startswith('geor'): print (word, label)
       label = label.upper()
-      if label not in self.upper_ontology:
-        self.upper_ontology[label] = [[label], len(self.upper_ontology)]
       word = word.strip().lower().translate(trannum).strip(self.strip_chars).replace(" ",connector)
       wordArr = word.split(connector)
       #wordArr = [w2.strip(self.strip_chars) for w2 in wordArr if w2.strip(self.strip_chars)]
@@ -432,9 +428,10 @@ class OntologyManager:
           else:
             shingle = shingleArr[0]
           label, _ = lexicon2.get(shingle, (None, None))
-          #ideally we would keep matters like AaA in the lexicon to match. This is a hack.
-          if label is not None:
+          #let's return only labels that are in the upper_ontology
+          if label is not None and (label[0] in self.upper_ontology or self.label2label.get(label[0]) in self.upper_ontology):
             if check_person_org_caps and ("PERSON" in label or "ORG" in label):
+              #ideally we would keep matters like AaA in the lexicon to match. This is a hack.
               if wordArr[0][0] != wordArr[0][0].upper() or  wordArr[-1][0] != wordArr[-1][0].upper(): continue
             label = label[0]
             label = self.label2label.get(label, label)
@@ -462,8 +459,8 @@ class OntologyManager:
     for words in this text.
     """
     if do_pii_only:
-      ignore_ner_labels = set(['LANGUAGE', 'FOOD', 'LAW', 'DATE', 'EVENT', 'FAC', 'ANIMAL', 'PLANT', \
-        'JOB', 'ANAT', 'BIO_CHEM_ENTITY', 'QUANITY', 'DOMAIN_NAME','WORK_OF_ART', 'PRODUCT'])
+      ignore_ner_labels = {'LANGUAGE', 'FOOD', 'LAW', 'DATE', 'EVENT', 'FAC', 'ANIMAL', 'PLANT', \
+        'JOB', 'ANAT', 'BIO_CHEM_ENTITY', 'QUANITY', 'DOMAIN_NAME','WORK_OF_ART', 'PRODUCT'}
     else:
       ignore_ner_labels = []
     max_word_len =self.max_word_len
