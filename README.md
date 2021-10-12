@@ -24,7 +24,7 @@ This repo is also home for reference implementation for the PII Hackathon, run b
 - git clone  https://github.com/bigscience-workshop/pii_processing
 - cd pii_processing/
 - pip install -r requirements.txt
-- python setup.py build
+- python setup.py install
 - python -m nltk.downloader punkt stopwords  wordnet
 - python -m spacy download en_core_web_lg
 
