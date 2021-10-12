@@ -1,16 +1,13 @@
 import os
 import tarfile
 import logging
-import sys
 
 # Filter Cython warnings that would force everybody to re-compile from source (like https://github.com/numpy/numpy/pull/432).
 import warnings
 
 warnings.filterwarnings("ignore", message="spacy.strings.StringStore size changed")
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             os.path.pardir, os.path.pardir)))
 
-from neuralcoref import NeuralCoref
+from neuralcoref.neuralcoref import NeuralCoref
 from neuralcoref.file_utils import (
     NEURALCOREF_MODEL_URL,
     NEURALCOREF_MODEL_PATH,
