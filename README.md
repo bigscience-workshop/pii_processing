@@ -14,8 +14,8 @@ This is code for a multi-lingual Named Entity Recognition and PII processor used
 ## PII Hackathon
 This repo is also home for reference implementation for the PII Hackathon, run by Ontocord, AISC, and BigScience
 
-- The code under the directory ontology will be used for Module 1.
-- The code under the directory pii will be used for Module 2.
+- The code under the directory misc will be used for Module 1.
+- The code under the directory ontology and pii will be used for Module 2.
 - The code under the directory masakhane-ner will be used for Module 3.
 - TODO: Module 4, We will provide a reference implementation for an ensemble semi-supervised learning training of a transformer model
  
