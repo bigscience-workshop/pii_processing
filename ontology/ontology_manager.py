@@ -1,3 +1,17 @@
+# coding=utf-8
+# Copyright, 2021 Ontocord, LLC, All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from random import sample
 import glob, os, re
 import multiprocessing
@@ -244,6 +258,7 @@ class OntologyManager:
   def _get_all_word_shingles(self, wordArr, max_word_len=None, create_suffix_end=True):
     """  create patterned variations (prefix and suffix based shingles) """
     lenWordArr = len(wordArr)
+    wordArr = [w.lower() for w in wordArr]
     if max_word_len is None: max_word_len =self.max_word_len
     compound_word_step = self.compound_word_step
     wordArr1 = wordArr2 = wordArr3 = wordArr4 = None
@@ -399,7 +414,7 @@ class OntologyManager:
       connector = self.connector
     if not supress_cjk_tokenize and self.cjk_detect(word):
       word = self.cjk_pre_tokenize(word, connector)
-    word = word.strip().lower().translate(trannum).strip(self.strip_chars) 
+    word = word.strip().translate(trannum).strip(self.strip_chars) 
     wordArr = word.replace(" ",connector).split(connector) 
     #wordArr = [w2.strip(self.strip_chars) for w2 in wordArr if w2.strip(self.strip_chars)]
     if not wordArr:
@@ -409,17 +424,18 @@ class OntologyManager:
     long_shingles= self._get_all_word_shingles(wordArr, max_word_len=100000, create_suffix_end=False)
     for ontology in reversed(list(self.ontology.values())):
       #find patterned variations (shingles)
-      for wordArr in long_shingles + all_shingles: # we can probably dedup to make it faster
-        if wordArr and wordArr[0] in ontology:
-          lexicon2 = ontology[wordArr[0]][2+min(3,lenWordArr//(compound_word_step+1))]
-          if len(wordArr) > 1:
-            word = '*'+connector+connector.join((wordArr[1:]))
+      for shingleArr in long_shingles + all_shingles: # we can probably dedup to make it faster
+        if shingleArr and shingleArr[0] in ontology:
+          lexicon2 = ontology[shingleArr[0]][2+min(3,lenWordArr//(compound_word_step+1))]
+          if len(shingleArr) > 1:
+            shingle = '*'+connector+connector.join((shingleArr[1:]))
           else:
-            word = wordArr[0]
-          label, _ = lexicon2.get(word, (None, None))
+            shingle = shingleArr[0]
+          label, _ = lexicon2.get(shingle, (None, None))
+          #ideally we would keep matters like AaA in the lexicon to match. This is a hack.
           if label is not None:
             if check_person_org_caps and ("PERSON" in label or "ORG" in label):
-              if word[0] != word[0].upper(): continue
+              if wordArr[0][0] != wordArr[0][0].upper() or  wordArr[-1][0] != wordArr[-1][0].upper(): continue
             label = label[0]
             label = self.label2label.get(label, label)
             return word, label
