@@ -318,6 +318,7 @@ class OntologyManager:
       label = label.upper()
       word = word.strip().lower().translate(trannum).strip(self.strip_chars).replace(" ",connector)
       wordArr = word.split(connector)
+      orig_lens = len(word) + len(wordArr)
       #wordArr = [w2.strip(self.strip_chars) for w2 in wordArr if w2.strip(self.strip_chars)]
       #print (word)
       # some proper nouns start with stop words like determiners. let's strip those.
@@ -331,7 +332,7 @@ class OntologyManager:
       word = connector.join(wordArr)
       #we don't have an actual count of the word in the corpus, so we create a weight based 
       #on the length, assuming shorter words with less compound parts are more frequent
-      weight = 1/(1.0+math.sqrt(len(word) + len(wordArr)))
+      weight = 1/(1.0+math.sqrt(orig_lens))
       lenWordArr = len(wordArr)
       if lenWordArr == 0: 
         continue
@@ -431,7 +432,7 @@ class OntologyManager:
           #let's return only labels that are in the upper_ontology
           if label is not None and (label[0] in self.upper_ontology or self.label2label.get(label[0]) in self.upper_ontology):
             if check_person_org_caps and ("PERSON" in label or "ORG" in label):
-              #ideally we would keep matters like AaA in the lexicon to match. This is a hack.
+              #ideally we would keep patterns like AaA as part of the shingle to match. This is a hack.
               if wordArr[0][0] != wordArr[0][0].upper() or  wordArr[-1][0] != wordArr[-1][0].upper(): continue
             label = label[0]
             label = self.label2label.get(label, label)
@@ -448,7 +449,7 @@ class OntologyManager:
     return ngram_start, ngram_end
         
 
-  def tokenize(self, text, connector=None, supress_cjk_tokenize=False, return_dict=True, do_pii_only=True, row_id=0, doc_id=0):
+  def tokenize(self, text, connector=None, supress_cjk_tokenize=False, return_dict=True, row_id=0, doc_id=0):
     """
     Parse text for words in the ontology.  For compound words,
     transform into single word sequence, with a word potentially
@@ -458,11 +459,6 @@ class OntologyManager:
     Returns the tokenized text along with word to ner label mapping
     for words in this text.
     """
-    if do_pii_only:
-      ignore_ner_labels = {'LANGUAGE', 'FOOD', 'LAW', 'DATE', 'EVENT', 'FAC', 'ANIMAL', 'PLANT', \
-        'JOB', 'ANAT', 'BIO_CHEM_ENTITY', 'QUANITY', 'DOMAIN_NAME','WORK_OF_ART', 'PRODUCT'}
-    else:
-      ignore_ner_labels = []
     max_word_len =self.max_word_len
     compound_word_step = self.compound_word_step
     labels = []
@@ -491,7 +487,7 @@ class OntologyManager:
             # we don't match sequences that start and end with stopwords
             if wordArr[-1].lower() in self.stopwords: continue
             _, label = self.in_ontology(new_word, connector=connector, supress_cjk_tokenize=True)
-            if label is not None and label not in ignore_ner_labels:
+            if label is not None:
               new_word = new_word.replace(" ", connector)
               #print ('found', new_word)
               sent[i] = new_word
