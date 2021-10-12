@@ -19,13 +19,12 @@ This repo is also home for reference implementation for the PII Hackathon, run b
 - The code under the directory masakhane-ner will be used for Module 3.
 - TODO: Module 4, We will provide a reference implementation for an ensemble semi-supervised learning training of a transformer model
  
-## Requirements and Installation
+## Requirements and Building
 
-- pip install spacy==2.1.8
-- git clone  https://github.com/ontocord/pii_processing
+- git clone  https://github.com/bigscience-workshop/pii_processing
 - cd pii_processing/
-- python setup.py install
-- pip install datasets transformers faker sentencepiece
+- pip install -r requirements.txt
+- python setup.py build
 - python -m nltk.downloader punkt stopwords  wordnet
 - python -m spacy download en_core_web_lg
 
