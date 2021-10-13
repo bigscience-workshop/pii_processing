@@ -1153,63 +1153,11 @@ first_names = {
     }
 
      
-def create_english_cleaned_dataset(share_dir='/content/drive/MyDrive/PII_Dataset/'):   
+def create_english_cleaned_dataset(share_dir='/content/drive/Shareddrives/BigScience/'):   
 
   prev={}
   if not os.path.exists("cleaned_english.tsv"):
     with open("english.tsv", "w", encoding="utf8") as o:
-
-      #https://huggingface.co/datasets/newspop#licensing-information - CC-BY
-      dataset = load_dataset("newspop")
-      topics_to_ner = {'economy':None, 'microsoft': '<ORG>', 'obama': '<PUBLIC_FIGURE>', 'palestine': '<GPE>'}
-      for d in (dataset['train'], ):
-        for idx, data in enumerate(d):
-          l2, headline, topic = data['title'], data['headline'], data['topic']
-          ner_label = topics_to_ner.get(topic)
-
-      """
-     @article{Moniz2018MultiSourceSF,
-  title={Multi-Source Social Feedback of Online News Feeds},
-  author={N. Moniz and L. Torgo},
-  journal={ArXiv},
-  year={2018},
-  volume={abs/1801.07055}
-    }   
-      """
-              
-      #https://huggingface.co/datasets/banking77 under CC-by-4.0
-      """
-      @inproceedings{Casanueva2020,
-    author      = {I{\~{n}}igo Casanueva and Tadas Temcinas and Daniela Gerz and Matthew Henderson and Ivan Vulic},
-    title       = {Efficient Intent Detection with Dual Sentence Encoders},
-    year        = {2020},
-    month       = {mar},
-    note        = {Data available at https://github.com/PolyAI-LDN/task-specific-datasets},
-    url         = {https://arxiv.org/abs/2003.04807},
-    booktitle   = {Proceedings of the 2nd Workshop on NLP for ConvAI - ACL 2020}
-    }
-      """
-      dataset = load_dataset("banking77")
-      for d in (dataset['train'], ):
-        for idx, data in enumerate(d):
-          l2 = data['text']
-          l2 = l2.replace("\n", " ").replace("  ", " ").replace("  ", " ")
-          l2Arr = l2.split()
-          if len(l2Arr) > 3:
-            l2 = l2.replace("bank account", "<FINANCIAL_PRODUCT> account").replace("card", "<FINANCIAL_PRODUCT>").replace("Google Pay", "<ORG> <FINANCIAL_PRODUCT>").replace("Apple pay", "<ORG> <FINANCIAL_PRODUCT>").replace("American Express", "<FINANCIAL_PRODUCT>")
-            l2 = l2.replace("Apple Watch", "<DEVICE>")
-            l2 = l2.replace("US", "<GPE>").replace("EU", "<GPE>").replace("UK", "<GPE>").replace("European Union", "<GPE>").replace("Europe", "<GPE>")
-            if l2.startswith("Why"): continue
-            if (" id " in l2 or "ident" in l2):
-              o.write (l2+random.choice([" My id is <GOVT_ID>.", " SSN: <GOVT_ID>.", " My number is <GOVT_ID>."])+"\tbanking77\n")
-            elif "get " in l2 or "order " in l2 or "like " in l2 or "want " in l2:
-              if random.choice([0,1]):
-                o.write (random.choice(["My name is <PERSON>, Acct - <CARDINAL>. ", "<PERSON> here. ", "I'm <PERSON>. "])+ l2+"\tbanking77\n")
-              else:
-                o.write (l2.strip(' ?.') + random.choice(["? My name is <PERSON>.", "? <PERSON> here.", "? I'm <PERSON>."])+"\tbanking77\n")
-            else:
-              o.write (l2.strip(' ?.') + random.choice(["? My name is <PERSON>, DOB: <DATE>, Acct #: <CARDINAL>.", "? Asking for acct #: <CARDINAL>.", "? My name is <PERSON>, #<CARDINAL>."])+"\tbanking77\n")
-
 
       #https://github.com/reglab/casehold court cases are government works and in the public domain. 
       #Annotations and selections are under Apache-2.0 License
@@ -1297,7 +1245,6 @@ def create_english_cleaned_dataset(share_dir='/content/drive/MyDrive/PII_Dataset
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
       """
-      public_figure_tag = "<PUBLIC_FIGURE>"
       # An experiment we could try is tagging with another public figure tag called PUBLIC_FIGURE_OPINION 
       # so that we could train a model to distinguish between public figure mentions in opinion domains vs non-opinion domains
       
@@ -1306,25 +1253,15 @@ def create_english_cleaned_dataset(share_dir='/content/drive/MyDrive/PII_Dataset
          for idx, data in enumerate(d):
           score = sum ([data[feature] for feature in [ 'toxicity', 'severe_toxicity', 'obscene', 'threat', 'insult', 'identity_attack', 'sexual_explicit']])
           l2 = data['text']
-          l2 = l2.replace("Trump",public_figure_tag).replace("Trump",public_figure_tag).replace("Obama",public_figure_tag).replace("Clinton",public_figure_tag).replace("Trudeau",public_figure_tag)
-          l2 = l2.replace('Alaskans', '<NORP>').replace('Alaskan', '<NORP>').replace('Alaska', '<GPE>').replace('Americans', '<NORP>').replace('American', '<NORP>').replace('America', '<GPE>').replace('Oregon', '<GPE>').replace('United States', '<GPE>').replace('Seattle','GPE')
           l2 = l2.replace("\n", " ").replace("  ", " ").replace("  ", " ")
           l2Arr = l2.split()
           has_a_name = has_any(first_names, l2Arr)
           l2_lower = l2.lower()
           if random.choice([0,1]) and not has_a_name and "mr." not in l2_lower and "ms." not in l2_lower and  "mrs." not in l2_lower and "president" not in l2_lower and "governor" not in l2_lower and  "mayor" not in l2_lower:
             continue
-          l2 = " ".join(["<DOMAIN_NAME>" if a.startswith("http") or a.startswith("www") else a for a in l2Arr])
           if len(l2Arr) > 10 and len(l2Arr) < 50 and (score <= 0.5 or random.randint(0, 10)==0): # having too much toxic content may skew the data
-            if has_a_name or "mr." in l2_lower or "ms." in l2_lower or "mrs." in l2_lower or "president" in l2_lower or "governor" in l2_lower or "mayor" in l2_lower:
+            if has_a_name or "mr." in l2_lower or "ms." in l2_lower or "mrs." in l2_lower or "senator" in l2_lower or "president" in l2_lower or "governor" in l2_lower or "mayor" in l2_lower:
               o.write (l2+"\tcivil_comments\n")
-            elif "you " in l2_lower and random.randint(0, 100)==0):
-              if l2.startswith("you"):
-                l2 = l2.replace("you ", "<PERSON> you ", 1)
-                o.write (l2+"\tcivil_comments\n")
-              elif l2.startswith("You"):
-                l2 = l2.replace("You ", "<PERSON> you ", 1)
-                o.write (l2+"\tcivil_comments\n")
 
     os.system("sort --parallel=32 english.tsv -o english.tsv")
 
@@ -1355,5 +1292,79 @@ def create_english_cleaned_dataset(share_dir='/content/drive/MyDrive/PII_Dataset
   os.system(f"cp english_cleaned.tsv {share_dir}/english_cleaned.tsv")
   #os.system("rm ./english.tsv")
 
+def cleanup_english2():
+  with open("english_cleaned2.tsv", "w", encoding="utf8") as o:
+    with open("english_cleaned.tsv", "rb") as f:
+      prev=""
+      while True:
+        l = f.readline().decode()
+        if not l: break
+        l = l.strip()
+        l2 = l.replace(":", "").replace("[", "").replace("]", "").replace(".", "").replace("!", "").replace("?", "").replace(",", "").replace("-", "").replace(";", "").replace(" ", "").lower()
+        prev2 = prev.replace(":", "").replace("[", "").replace("]", "").replace(".", "").replace("!", "").replace("?", "").replace(",", "").replace("-", "").replace(";", "").replace(" ", "").lower()
+        if prev != "" and (l2==prev2 or (len(prev) > 10 and len(l) > 10 and prev2[:10]== l2[:10])):
+          if len(l) > len(prev):
+            prev = l
+          continue
+
+        if prev:
+          if prev[0].lower() not in "abcdefghijklmnopqrstuvwxyz": 
+            prev=l
+            continue
+          ret = prev.split("\t")
+          if len(ret) != 2:
+            prev=l
+            continue
+          sent, ds = ret
+          sent = sent.split(".")
+          while len(sent) > 3:
+            sent2 = sent[:3]
+            sent = sent[3:]
+            if sent2 and sent2[0] and sent2[0][0].lower() not in "abcdefghijklmnopqrstuvwxyz": 
+              prev=l
+              continue
+            has_a_name = has_any(first_names, sent2)
+            if not has_a_name:
+              prev = l
+              continue
+            sent2 = ". ".join(sent2)+"."
+            sent2 = sent2.strip().replace("  ", " ").replace(" .com", ".com")
+            if len(sent2) < 20: 
+              prev = l
+              continue
+            #print (sent2)
+            o.write(sent2+"\t"+ds+"\n")
+          if sent and sent[0] and sent[0][0].lower() not in "abcdefghijklmnopqrstuvwxyz": 
+              prev=l
+              continue
+          sent2 = ". ".join(sent)+"."
+          sent2 = sent2.strip().replace("  ", " ").replace(" .com", ".com")
+          if len(sent2) < 20: 
+            prev = l
+            continue
+          #print (sent2)
+          o.write(sent2+"\t"+ds+"\n")
+        prev = l
+        
+      if prev:
+          if prev[0].lower()  in "abcdefghijklmnopqrstuvwxyz": 
+            sent, ds = prev.split("\t")
+            sent = sent.split(".")
+            while len(sent) > 3:
+              sent2 = sent[:3]
+              sent = sent[3:]
+              sent2 = ". ".join(sent2)+"."
+              sent2 = sent2.strip().replace("  ", " ").replace(" .com", ".com")
+              if len(sent2) >= 20:
+                print (sent2)
+                o.write(sent2+"\t"+ds+"\n")
+            sent2 = ". ".join(sent)+"."
+            sent2 = sent2.strip().replace("  ", " ").replace(" .com", ".com")
+            #print (sent2)
+            if len(sent2) >= 20:
+              o.write(sent2+"\t"+ds+"\n")
+
+
 create_english_cleaned_dataset()
+cleanup_english2()
     
