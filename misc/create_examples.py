@@ -1337,6 +1337,10 @@ def cleanup_english2():
           if sent and sent[0] and sent[0][0].lower() not in "abcdefghijklmnopqrstuvwxyz": 
               prev=l
               continue
+          has_a_name = has_any(first_names, sent)
+          if not has_a_name:
+              prev = l
+              continue
           sent2 = ". ".join(sent)+"."
           sent2 = sent2.strip().replace("  ", " ").replace(" .com", ".com")
           if len(sent2) < 20: 
