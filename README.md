@@ -29,7 +29,7 @@ This repo is also home for reference implementation for the PII Hackathon, run b
 - python -m spacy download en_core_web_lg
 
 TODO:
-For module 3, we will be using neuralcoref to preprocess data, and we will want to change the requirements.txt to use spacy and 
+For module 3, we will be using neuralcoref to preprocess data, and we will want to change the requirements.txt to use spacy==2.1.8 and 
 - python setup.py install
 
 
