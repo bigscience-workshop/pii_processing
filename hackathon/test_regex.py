@@ -1021,8 +1021,13 @@ def apply_rules(infile, outfile, rule_base, target_lang, do_ontology_manager=Fal
 
 
 if __name__ == "__main__":
+    initial = target_lang = None
+    if "-initial" in sys.argv:
+      initial = sys.argv[sys.argv.index("-initial")+1]   
     if "-target_lang" in sys.argv:
       target_lang = sys.argv[sys.argv.index("-target_lang")+1]   
+    if initial and target_lang:
+      rulebase = getattr(pii_processing.regex, f"{initial}_{target_lang}").rulebase
       infile = f"{target_lang}.jsonl"
       outfile = "predicted_"+infile
-      right, wrong  = apply_rules(infile, outfile, rule_base_en, target_lang, char_before_after_window=10)
+      right, wrong  = apply_rules(infile, outfile, rulebase, target_lang, char_before_after_window=10)
