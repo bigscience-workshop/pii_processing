@@ -34,35 +34,14 @@ from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer, Marian
 import torch
 import sys
 from tqdm import tqdm
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                             os.path.pardir, os.path.pardir)))
 from pii_processing.ontology.ontology_manager import OntologyManager
 
 stopwords_en = set(stopwords.words('english'))
 
 junk_dict = dict([(a, 1) for a in "' 0123456789¯_§½¼¾×|†—~\"—±′–'°−{}[]·-\'?,./<>!@#^&*()+-‑=:;`→¶'"])
-
-# adapted from https://github.com/madisonmay/CommonRegex/blob/master/commonregex.py which is under the MIT License
-
-# a rulebase is a list or oredered rule lists and number of times to apply the rule groups.
-# a rule group is on oredered list of rules of the form (new_label, regex, old_label, before text, after text)
-# a rule will match if all of regex, old_label, before text and after text matches. 
-# - new_label is the label to tag the matching text
-# - regex is the regex to use
-# - old label is the label that this text was previously tagged as.  None means to ignore the test.  
-# - before text is some text before the matching pattern. None means to ignore the test.
-# - after text is some text after the matching pattern. None means to ignore the test.
- 
-rule_base_en = [([
-    ("AGE", re.compile("\S+ years old|\S+\-years\-old|\S+ year old|\S+\-year\-old"), None, None, None),
-    ("STREET_ADDRESS", re.compile(
-        '\d{1,4} [\w\s]{1,20} (?:street|st|avenue|ave|road|rd|highway|hwy|square|sq|trail|trl|drive|dr|court|ct|park|parkway|pkwy|circle|cir|boulevard|blvd)\W?(?=\s|$)'), None, None, None),
-    ("STREET_ADDRESS", re.compile('\b\d{5}(?:[-\s]\d{4})?\b'), None, None, None),
-    ("STREET_ADDRESS", re.compile('P\.? ?O\.? Box \d+'), None, None, None),
-    ("GOVT_ID", re.compile(
-        '(?!000|666|333)0*(?:[0-6][0-9][0-9]|[0-7][0-6][0-9]|[0-7][0-7][0-2])[- ](?!00)[0-9]{2}[- ](?!0000)[0-9]{4}'), None, None, None),
-    ("DISEASE", re.compile("diabetes|cancer|HIV|AIDS|Alzheimer's|Alzheimer|heart disease"), None, None, None),
-    ("NORP", re.compile("upper class|middle class|working class|lower class"), None, None, None),
-    ], 1),
-]
 
 faker_map = dict([(a.split("_")[0], a) for a in [
     'ar_AA',
