@@ -37,6 +37,9 @@ from tqdm import tqdm
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              os.path.pardir, os.path.pardir)))
+import json
+import pii_processing
+
 from pii_processing.ontology.ontology_manager import OntologyManager
 
 stopwords_en = set(stopwords.words('english'))
@@ -936,7 +939,7 @@ def post_translation_steps(outfile, translations, original_sentences, ner_mappin
 #TODO - do complicated rules, such as PERSON Inc. => ORG
 #TODO - calculate fmeasure
 #TODO - check for zh working properly
-def apply_rules(infile, outfile, rule_base, target_lang, do_ontology_manager=False, do_spacy_if_avail=False, char_before_after_window=10):
+def apply_rules(infile, outfile, rule_base, target_lang, do_ontology_manager=True, do_spacy_if_avail=True, char_before_after_window=10):
   nlp = None
   if do_spacy_if_avail:
     if target_lang == 'en':
@@ -1021,16 +1024,30 @@ def apply_rules(infile, outfile, rule_base, target_lang, do_ontology_manager=Fal
 
 
 if __name__ == "__main__":
-    import json
+    rulebase = [([
+      ("AGE", re.compile("\S+ years old|\S+\-years\-old|\S+ year old|\S+\-year\-old"), None, None, None),
+      ("STREET_ADDRESS", re.compile(
+          '\d{1,4} [\w\s]{1,20} (?:street|st|avenue|ave|road|rd|highway|hwy|square|sq|trail|trl|drive|dr|court|ct|park|parkway|pkwy|circle|cir|boulevard|blvd)\W?(?=\s|$)'), None, None, None),
+      ("STREET_ADDRESS", re.compile('\b\d{5}(?:[-\s]\d{4})?\b'), None, None, None),
+      ("STREET_ADDRESS", re.compile('P\.? ?O\.? Box \d+'), None, None, None),
+      ("GOVT_ID", re.compile(
+          '(?!000|666|333)0*(?:[0-6][0-9][0-9]|[0-7][0-6][0-9]|[0-7][0-7][0-2])[- ](?!00)[0-9]{2}[- ](?!0000)[0-9]{4}'), None, None, None),
+      ("DISEASE", re.compile("diabetes|cancer|HIV|AIDS|Alzheimer's|Alzheimer|heart disease"), None, None, None),
+      ("NORP", re.compile("upper class|middle class|working class|lower class"), None, None, None),
+      ], 1),
+    ]
+
     initial = target_lang = None
     if "-initial" in sys.argv:
       initial = sys.argv[sys.argv.index("-initial")+1]   
     if "-target_lang" in sys.argv:
       target_lang = sys.argv[sys.argv.index("-target_lang")+1]   
-    if initial and target_lang:
-      rulebase = getattr(pii_processing.regex, f"{initial}_{target_lang}").rulebase
+    if target_lang:
+      #TODO - load the rulebase dynamically from pii_processing.regex folder a file of the form <initial>_<target_lang>.py
       infile = f"{target_lang}.jsonl"
       outfile = "predicted_"+infile
       right, wrong  = apply_rules(infile, outfile, rulebase, target_lang, char_before_after_window=10)
+      print (right)
+      print (wrong)
       json.dump(right, open(f"right_regex_{target_lang}.json", "w", encoding="utf8"), indent=1)
       json.dump(wrong, open(f"wrong_regex_{target_lang}.json", "w", encoding="utf8"), indent=1)
