@@ -15,7 +15,7 @@ python -m spacy download es_core_news_lg
 cd ..
 ```
 
-Then craete your regex files under the pii_processing/regex folder of the form ``<initial>_<target_lang>.py``.
+Then create your regex files under the pii_processing/regex folder of the form ``<initial>_<target_lang>.py``.
 
 Then test your regex on a file of the form ``<target_lang>.jsonl`` and create a file ``predicted_<target_lang>.jsonl``, ``right_regex_<target_lang>.json`` and ``wrong_regex_<target_lang>.json``
 
