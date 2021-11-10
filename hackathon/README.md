@@ -15,7 +15,9 @@ python -m spacy download es_core_news_lg
 cd ..
 ```
 
-Then create your regex files under the pii_processing/regex folder of the form ``<initial>_<target_lang>.py``.
+TODO: load dynamic regex file...Then create your regex files under the pii_processing/regex folder of the form ``<initial>_<target_lang>.py``.
+
+Currently: edit the file test_regex.py to add your regex directly under ``__main__``.
 
 Then test your regex on a file of the form ``<target_lang>.jsonl`` and create a file ``predicted_<target_lang>.jsonl``
 
