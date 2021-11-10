@@ -489,12 +489,14 @@ class OntologyManager:
             _, label = self.in_ontology(new_word, connector=connector, supress_cjk_tokenize=True)
             if label is not None:
               new_word = new_word.replace(" ", connector)
-              #print ('found', new_word)
-              sent[i] = new_word
-              labels.append(((new_word, pos, pos + len(new_word), row_id, doc_id), label))
-              for k in range(i+1, i+j+1):
-                sent[k] = None  
-              break
+              new_word = new_word.lstrip(",")
+              if new_word not in self.stopwords:
+                #print ('found', new_word)
+                sent[i] = new_word
+                labels.append(((new_word, pos, pos + len(new_word), row_id, doc_id), label))
+                for k in range(i+1, i+j+1):
+                  sent[k] = None  
+                break
       pos += len(sent[i])+1
     if return_dict:
       return {'text': " ".join([s for s in sent if s]), 'chunk2ner': dict(labels)}   
