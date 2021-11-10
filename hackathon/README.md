@@ -17,8 +17,8 @@ cd ..
 
 Then create your regex files under the pii_processing/regex folder of the form ``<initial>_<target_lang>.py``.
 
-Then test your regex on a file of the form ``<target_lang>.jsonl`` and create a file ``predicted_<target_lang>.jsonl``, ``right_regex_<target_lang>.json`` and ``wrong_regex_<target_lang>.json``
+Then test your regex on a file of the form ``<target_lang>.jsonl`` and create a file ``predicted_<target_lang>.jsonl``
 
 ```
-python test_regex.py -initial <initial> -target_lang <target_lang>
+python test_regex.py -target_lang <target_lang>
 ```
