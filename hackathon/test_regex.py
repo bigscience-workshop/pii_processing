@@ -983,7 +983,7 @@ def apply_rules(infile, outfile, rule_base, target_lang, do_ontology_manager=Tru
             else:
               #remove simple overlap
               for key in list(predict_ner.keys()):
-                if " "+key in ent or key+" " in ent or " "+ent in key or ent+" " in key:
+                if " "+key in ent or key+" " in ent: # or " "+ent in key or ent+" " in key:
                   if predict_ner[key] == 'PUBLIC_FIGURE':
                     label = "PUBLIC_FIGURE"
                   del predict_ner[key]
@@ -1016,16 +1016,14 @@ def apply_rules(infile, outfile, rule_base, target_lang, do_ontology_manager=Tru
                       continue
                   #remove simple overlap
                   for key in list(predict_ner.keys()):
-                    if " "+key in ent or key+" " in ent or " "+ent in key or ent+" " in key:
+                    if " "+key in ent or key+" " in ent:# or " "+ent in key or ent+" " in key:
                       del predict_ner[key]
                   pred.append((ent, label, rule_id, rule_level))
                   predict_ner[ent] = label
                   break
         d['predict_ner'] = list(predict_ner.items())
         o.write(json.dumps(d)+"\n")
-        print (pred)
-        for ent, label, rule_id, rule_level in list(set(pred)):
-          print (ent, label, rule_id, rule_level)
+        for ent, label, rule_id, rule_level in list(set(pred)): 
           if ent not in ner or ner[ent] != label:
             wrong[(ent, label, rule_id, rule_level)] = wrong.get((ent, label, rule_id, rule_level), 0) + 1
           else:
