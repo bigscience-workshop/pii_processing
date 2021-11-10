@@ -981,6 +981,12 @@ def apply_rules(infile, outfile, rule_base, target_lang, do_ontology_manager=Tru
               #print ("matched")
               continue
             else:
+              #remove simple overlap
+              for key in list(predict_ner.keys()):
+                if " "+key in ent or key+" " in ent or " "+ent in key or ent+" " in key:
+                  if predict_ner[key] == 'PUBLIC_FIGURE':
+                    label = "PUBLIC_FIGURE"
+                  del predict_ner[key]
               predict_ner[ent] = label
         rule_level = -1
         ner = d['ner'] # the human tagged data
@@ -991,35 +997,39 @@ def apply_rules(infile, outfile, rule_base, target_lang, do_ontology_manager=Tru
             for label, regex, old_label, before, after in rule_groups:
               rule_id += 1
               if old_label is None and times > 0: continue  
-              for x in regex.findall(text):
-                if type(x) != str: continue
-                if old_label is not None and x not in predict_ner: continue
+              for ent in regex.findall(text):
+                if type(ent) != str: continue
+                if old_label is not None and (ent not in predict_ner or predict_ner[ent] != old_label): continue
                 t = text
-                len_x = len(x)
-                while x in t:
-                  i = t.index(x)
+                len_ent = len(ent)
+                while ent in t:
+                  i = t.index(ent)
                   if before:
                     before_t[max(0, i-char_before_after_window): i]
                     if before not in before_t:
-                      t = t[i + len_x:]
+                      t = t[i + len_ent:]
                       continue
                   if after:
-                    after_t[i+len_x: min(len_text, i+len_x+char_before_after_window)]
+                    after_t[i+len_x: min(len_text, i+len_ent+char_before_after_window)]
                     if after not in after_t:
-                      t = t[i + len_x:]
+                      t = t[i + len_ent:]
                       continue
-                  pred.append((x, label, rule_id, rule_level))
-                  predict_ner[x] = label
+                  #remove simple overlap
+                  for key in list(predict_ner.keys()):
+                    if " "+key in ent or key+" " in ent or " "+ent in key or ent+" " in key:
+                      del predict_ner[key]
+                  pred.append((ent, label, rule_id, rule_level))
+                  predict_ner[ent] = label
                   break
-        #todo, remove simple overlap
-        #strip special chars
-        d['predict_ner'] = predict_ner
+        d['predict_ner'] = list(predict_ner.items())
         o.write(json.dumps(d)+"\n")
-        for x, label, rule_id, rule_level in list(set(pred)):
-          if x not in ner or ner[x] != label:
-            wrong[(x, label, rule_id, rule_level)] = wrong.get((x, label, rule_id, rule_level), 0) + 1
+        print (pred)
+        for ent, label, rule_id, rule_level in list(set(pred)):
+          print (ent, label, rule_id, rule_level)
+          if ent not in ner or ner[ent] != label:
+            wrong[(ent, label, rule_id, rule_level)] = wrong.get((ent, label, rule_id, rule_level), 0) + 1
           else:
-            right[(x, label, rule_id, rule_level)] = right.get((x, label, rule_id, rule_level), 0) + 1
+            right[(ent, label, rule_id, rule_level)] = right.get((ent, label, rule_id, rule_level), 0) + 1
   return right, wrong
 
 
@@ -1047,7 +1057,7 @@ if __name__ == "__main__":
       infile = f"{target_lang}.jsonl"
       outfile = "predicted_"+infile
       right, wrong  = apply_rules(infile, outfile, rulebase, target_lang, char_before_after_window=10)
-      print (right)
-      print (wrong)
-      json.dump(right, open(f"right_regex_{target_lang}.json", "w", encoding="utf8"), indent=1)
-      json.dump(wrong, open(f"wrong_regex_{target_lang}.json", "w", encoding="utf8"), indent=1)
+      print ('right', right)
+      print ('wrong', wrong)
+      #json.dump(right, open(f"right_regex_{target_lang}.json", "w", encoding="utf8"), indent=1)
+      #json.dump(wrong, open(f"wrong_regex_{target_lang}.json", "w", encoding="utf8"), indent=1)
