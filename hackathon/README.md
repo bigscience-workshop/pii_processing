@@ -1,5 +1,6 @@
 To test your regex, first install the package and spacy models:
-```git clone https://github.com/bigscience-workshop/pii_processing
+```
+git clone https://github.com/bigscience-workshop/pii_processing
 cd pii_processing
 pip install spacy==3.1  transformers datasets langid faker nltk sentencepiece fsspec tqdm
 pip install -r requirements.txt
