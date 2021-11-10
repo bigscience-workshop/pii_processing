@@ -1021,6 +1021,7 @@ def apply_rules(infile, outfile, rule_base, target_lang, do_ontology_manager=Fal
 
 
 if __name__ == "__main__":
+    import json
     initial = target_lang = None
     if "-initial" in sys.argv:
       initial = sys.argv[sys.argv.index("-initial")+1]   
@@ -1031,3 +1032,5 @@ if __name__ == "__main__":
       infile = f"{target_lang}.jsonl"
       outfile = "predicted_"+infile
       right, wrong  = apply_rules(infile, outfile, rulebase, target_lang, char_before_after_window=10)
+      json.dump(right, open(f"right_regex_{target_lang}.json", "w", encoding="utf8"), indent=1)
+      json.dump(wrong, open(f"wrong_regex_{target_lang}.json", "w", encoding="utf8"), indent=1)
