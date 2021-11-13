@@ -19,7 +19,7 @@ TODO: load dynamic regex file...Then create your regex files under the pii_proce
 
 Currently: edit the file test_regex.py to add your regex directly under ``__main__``.
 
-Then test your regex on a file of the form ``<target_lang>.jsonl`` and create a file ``predicted_<target_lang>.jsonl``
+Then test your regex on a file of the form ``<target_lang>.jsonl`` which will create a file ``predicted_<target_lang>.jsonl``
 
 ```
 python test_regex.py -target_lang <target_lang>
