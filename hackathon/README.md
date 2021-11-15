@@ -24,3 +24,13 @@ Then test your regex on a file of the form ``<target_lang>.jsonl`` which will cr
 ```
 python test_regex.py -target_lang <target_lang>
 ```
+
+OR you can import apply_fules from test_regex into your own code
+```
+from pii_processing.hackathon.test_regex import apply_rules
+infile = "<your infile such as en.jsonl>"
+outfile = "<your outputfile>"
+rulebase = [...] # you can load the rulebases from pii_processing.regex for example
+target_lang = "<your lang>"
+right, wrong  = apply_rules(infile, outfile, rulebase, target_lang)
+```
