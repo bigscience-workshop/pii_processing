@@ -13,24 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datasets import load_dataset
+
 import os
 import re
 import itertools
 from re import finditer
 import glob
 import random
-import fsspec
 import json
 from random import randint, choice
 from collections import Counter
 import spacy, itertools
 import langid
 from nltk.corpus import stopwords
-import fsspec, os, gzip
-from faker import Faker
-from faker.providers import person, company, geo, address, ssn
-from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer, MarianMTModel, AutoTokenizer, pipeline
+import os, gzip
 import torch
 import sys
 from tqdm import tqdm
