@@ -1,3 +1,5 @@
+# THIS REPO IS DEPRECATED. USE https://github.com/bigscience-workshop/data_tooling instead
+
 # Personally Identifiable Information Processing
 
 This is code for a multi-lingual Named Entity Recognition and PII processor used to remediate PII in web scale large language datasets for training large langauge models. This code is not meant to be used for general purpose PII remediation. 
